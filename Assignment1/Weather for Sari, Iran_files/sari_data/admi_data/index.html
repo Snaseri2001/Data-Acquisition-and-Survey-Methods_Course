@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<meta charset="UTF-8">
+
+	<title>300x600 Video UnderstitialAd</title>
+
+	<!-- START COPY HERE -->
+	<meta name="ad.size" content="width=300,height=600">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0">
+
+	<!-- GDN START
+	<script type="text/javascript" src="https://tpc.googlesyndication.com/pagead/gadgets/html5/api/exitapi.js"> </script>
+	GDN END -->
+
+	<!-- DOUBLECLICK STUDIO START
+	<script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script>
+	DOUBLECLICK STUDIO END -->
+
+	<!-- DFA/DFP START -->
+	<script>var clickTag = "undefined";</script>
+	<!-- DFA/DFP END -->
+
+	<style>
+		body,
+		html {
+			padding: 0;
+			margin: 0;
+			background: transparent;
+			overflow: hidden;
+		}
+
+		a,
+		canvas {
+			outline: 0;
+			margin: 0;
+			padding: 0;
+		}
+
+		#canvas {
+			z-index: 2000;
+		}
+
+		#t23_animation_container {
+			opacity: 0;
+			position: absolute;
+			z-index: 1000;
+		}
+
+		#t23_animation_container {
+			opacity: 0;
+			position: absolute;
+			z-index: 1000;
+		}
+
+		#t23_video_container {
+			position: absolute;
+			z-index: 1000;
+			top: 0px;
+			opacity: 0;
+			box-sizing: border-box;
+		}
+
+		#T23_Video {
+			position: absolute;
+			z-index: 100;
+		}
+
+		#muteBtn {
+			position: absolute;
+			z-index: 9999;
+			right: 5px;
+			bottom: 5px;
+		}
+
+		.Clicktag {
+			width: 100%;
+			height: 100%;
+
+			position: absolute;
+			left: 0;
+			top: 0;
+			display: block;
+			z-index: 3000;
+		}
+
+		.Clicktag img {
+			float: left;
+			width: 100%;
+			height: 100%;
+			display: block;
+		}
+
+		.hidden {
+			display: none;
+		}
+
+		.shown {
+			display: block;
+		}
+	</style>
+	<!-- END COPY HERE -->
+
+	<script src="index_data/t23.videoplayer.js"></script>
+	<link rel="stylesheet" href="index_data/t23.videoplayer.css">
+
+	<script src="index_data/createjs_2019.11.15_min.js"></script>
+	<!-- <script src="./createjs.min.js"></script> -->
+
+	<!-- GREENSOCK
+	<script src="https://s0.2mdn.net/ads/studio/cached_libs/gsap_3.9.1_min.js"></script>	
+	<script src="https://s0.2mdn.net/ads/studio/cached_libs/easepack_3.9.1_min.js"></script>
+	-->
+	
+	<script src="index_data/300x600_understitial.js"></script>
+
+	<script>
+		IAB_adconfig = {
+			canvasID: "canvas"
+		};
+		window.videoplayerTopPercent = 33.3;
+		window.videoplayerSizePercent = 100;
+
+		var _canvasReady = false;
+		var _videoReady = false;
+
+		var videoMuted = true;
+
+		/* REPLACE BY CANVAS */
+
+		var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation, video_container, muteBtn;
+
+		function init() {
+			//createjs.MotionGuidePlugin.install(); //uncomment for path tweens
+			canvas = document.getElementById("canvas");
+			anim_container = document.getElementById("t23_animation_container");
+			dom_overlay_container = document.getElementById("t23_dom_overlay_container");
+			video_container = document.getElementById("t23_video_container");
+			muteBtn = document.getElementById("muteBtn");
+
+			var comp = AdobeAn.getComposition(Object.keys(AdobeAn.compositions)[0]);
+			var lib = comp.getLibrary();
+			if (lib.properties.manifest.length < 1) {
+				//VECT
+				handleComplete({}, comp);
+			} else {
+				//IMG
+				var loader = new createjs.LoadQueue(false);
+				loader.addEventListener("fileload", function (evt) {
+					handleFileLoad(evt, comp)
+				});
+				loader.addEventListener("complete", function (evt) {
+					handleComplete(evt, comp)
+				});
+				var lib = comp.getLibrary();
+				loader.loadManifest(lib.properties.manifest);
+			}
+		}
+		function handleFileLoad(evt, comp) {
+			var images = comp.getImages();
+			if (evt && (evt.item.type == "image")) { images[evt.item.id] = evt.result; }
+		}
+		function handleComplete(evt, comp) {
+			var lib = comp.getLibrary();
+			var ss = comp.getSpriteSheet();
+			var queue = evt.target;
+			var ssMetadata = lib.ssMetadata;
+			for (i = 0; i < ssMetadata.length; i++) {
+				ss[ssMetadata[i].name] = new createjs.SpriteSheet({ "images": [queue.getResult(ssMetadata[i].name)], "frames": ssMetadata[i].frames })
+			}
+			exportRoot = new lib._300x600_understitial();
+			stage = new lib.Stage(canvas);
+			stage.addChild(exportRoot);
+			stage.enableMouseOver();
+			fnStartAnimation = function () {
+				createjs.Ticker.setFPS(lib.properties.fps);
+				createjs.Ticker.addEventListener("tick", stage);
+				anim_container.style.opacity = "1";
+				video_container.style.opacity = "1";
+			}
+			function makeResponsive(isResp, respDim, isScale, scaleType) {
+				var lastW, lastH, lastS = 1;
+				window.addEventListener('resize', resizeCanvas);
+				resizeCanvas();
+				function resizeCanvas() {
+					var w = lib.properties.width, h = lib.properties.height;
+					var iw = window.innerWidth, ih = window.innerHeight;
+					var pRatio = window.devicePixelRatio || 1, xRatio = iw / w, yRatio = ih / h, sRatio = 1;
+					if (isResp) {
+						if ((respDim == 'width' && lastW == iw) || (respDim == 'height' && lastH == ih)) {
+							sRatio = lastS;
+						}
+						else if (!isScale) {
+							if (iw < w || ih < h)
+								sRatio = Math.min(xRatio, yRatio);
+						}
+						else if (scaleType == 1) {
+							sRatio = Math.min(xRatio, yRatio);
+						}
+						else if (scaleType == 2) {
+							sRatio = Math.max(xRatio, yRatio);
+						}
+					}
+					canvas.width = w * pRatio * sRatio;
+					canvas.height = h * pRatio * sRatio;
+					canvas.style.width = dom_overlay_container.style.width = anim_container.style.width = w * sRatio + 'px';
+					canvas.style.height = anim_container.style.height = dom_overlay_container.style.height = h * sRatio + 'px';
+					stage.scaleX = pRatio * sRatio;
+					stage.scaleY = pRatio * sRatio;
+					lastW = iw; lastH = ih; lastS = sRatio;
+					video_container.style.left = video_container.style.right = canvas.style.left = dom_overlay_container.style.left = canvas.style.right = dom_overlay_container.style.right = "auto";
+
+					if (iw > ih / 2) {
+						if (anim_container.className.indexOf("left") != -1) {
+							video_container.style.left = anim_container.style.left = dom_overlay_container.style.left = "0px";
+						}
+						if (anim_container.className.indexOf("right") != -1) {
+							video_container.style.right = anim_container.style.right = dom_overlay_container.style.right = "0px";
+						}
+						if (anim_container.className.indexOf("center") != -1) {
+							video_container.style.left = anim_container.style.left = dom_overlay_container.style.left = ((iw / 2) - canvas.offsetWidth / 2) + "px";
+						}
+					}
+
+					if (iw <= ih / 2) {
+						video_container.style.left = anim_container.style.left = dom_overlay_container.style.left = "0px";
+					}
+
+					if (iw > ih / 2) {
+						video_container.width = ih / 2;
+						video_container.style.width = ih / 2 + "px";
+					} else {
+						video_container.width = iw;
+						video_container.style.width = iw + "px";
+					}
+
+					// video_container.style.top = (canvas.offsetHeight * (window.videoplayerTopPercent / 100)) + "px";
+					video_container.style.padding = video_container.offsetWidth * (1 - (window.videoplayerSizePercent / 100)) + "px";
+
+
+				}
+			}
+			makeResponsive(true, 'both', true, 1);
+			AdobeAn.compositionLoaded(lib.properties.id);
+
+			canvasReady();
+		}
+
+
+		/* END | REPLACE BY CANVAS */
+
+
+		function initBanner() {
+			init();
+			document.getElementsByTagName('canvas')[0].addEventListener("mousedown", onMousedown, false);
+		}
+		function onMousedown(e) { if (e.button == 2) window.contextMenu = true; }
+
+		var getUriParams = function () {
+			var query_string = {}
+			var query = window.location.search.substring(1);
+			var parmsArray = query.split('&');
+			if (parmsArray.length <= 0) return query_string;
+			for (var i = 0; i < parmsArray.length; i++) {
+				var pair = parmsArray[i].split('=');
+				var val = decodeURIComponent(pair[1]);
+				if (val != '' && pair[0] != '') query_string[pair[0]] = val;
+			}
+			return query_string;
+		}();
+
+		function callClicktag(evt, cTag) {
+			var node = evt.target;
+			if (window.contextMenu) { window.contextMenu = false; return; }
+
+			if (typeof cTag == 'undefined' || cTag == 0) cTag = '';
+
+			if (typeof node.nodeName != "undefined" && node.nodeName.toLowerCase() == "img") node = evt.target.parentNode;
+			if (typeof getUriParams['clicktag' + cTag] != "undefined") {
+				if (typeof node.nodeName != "undefined" && node.nodeName.toLowerCase() == "a") {
+					node.href = getUriParams['clicktag' + cTag];
+					return true;
+				} else {
+					if (typeof evt != "undefined") evt.preventDefault();
+					window.open(getUriParams['clicktag' + cTag], "_blank");
+					return false;
+				}
+			} else if (typeof window['clickTag' + cTag] != "undefined" && window['clickTag' + cTag] != "http://www.google.com") {
+				if (typeof evt != "undefined") evt.preventDefault();
+				window.open(window['clickTag' + cTag], "_blank");
+				return false;
+			} else if (typeof ExitApi == "object") {
+				if (typeof evt != "undefined") evt.preventDefault();
+				ExitApi.exit();
+				return false;
+			} else if (typeof Enabler == "object") {
+				if (typeof evt != "undefined") evt.preventDefault();
+				Enabler.exit('clickTAG' + cTag);
+				return false;
+			} else {
+				if (typeof evt != "undefined") evt.preventDefault();
+				console.log("no clicktag configured");
+				return false;
+			}
+		}
+
+		function canvasReady() {
+			_canvasReady = true;
+			playAd();
+		}
+
+		function videoReady() {
+			_videoReady = true;
+			playAd();
+		}
+
+		function playAd() {
+			if (_videoReady && _canvasReady) {
+				vp.play();
+				fnStartAnimation();
+			}
+		}
+
+		window.addEventListener('load', function () {
+			console.log("INIT VIDEO")
+			var options = {
+				loop: false,
+				loop_cycles: 2,
+				muted: true,
+				autoplay: false,
+				customEvents: {
+					loadedmetadata: 'videoReady',
+					ended: false,
+				},
+				posterFrame: "end",
+				controlOpacity: 1,
+			};
+
+			window.vp = new VideoPlayer('#t23_video_container', options);
+
+
+			window.vp.video.addEventListener('ended', videoEndedHandler);
+			
+			// VideoPlayer.prototype.someFancyFunction = function() {
+			//   console.log('some fancy function within videoplayer');
+			// };
+			function videoEndedHandler (ve) {
+				//console.log('finished');
+				exportRoot.gotoAndPlay('endAnim');
+			}
+
+		});
+
+	</script>
+	
+	<script>
+		function replayVideo() {
+			var video = document.querySelector('video');
+			video.pause();
+			video.currentTime = '0';
+			video.play();
+			exportRoot.gotoAndStop(1);
+			//exportRoot.mc_scale_anim.gotoAndStop(0);
+			exportRoot.mc_bg_img.gotoAndStop(0);
+			exportRoot.play();
+			window.currentItem = 1;
+		}
+
+		var mute = true;
+
+		function toggleMute() {
+			var video = document.querySelector('video');
+			if (mute) {
+				video.muted = false;
+				muteButton.gotoAndStop(1)
+			} else {
+				video.muted = true;
+				muteButton.gotoAndStop(0)
+			}
+			mute = !mute;
+		}
+	</script>
+<script type="text/javascript">
+    
+  (function() {
+    var MAX_URL_PARAM_LENGTH = 34;
+    var CLICK_X_URL_KEY = 'nx';
+    var CLICK_Y_URL_KEY = 'ny';
+    var CREATIVE_DIMENSIONS_KEY = 'dim';
+    var AD_URL_PARAM = '&adurl=';
+
+    var relegateNavigation = '';
+    var urlParamMap = {};
+
+    var isNewtonTokenSet = false;
+    var isTurtleXAdClick = false;
+    var reportingIds = {};
+
+    urlParamMap[CLICK_X_URL_KEY] = null;
+    urlParamMap[CLICK_Y_URL_KEY] = null;
+    urlParamMap[CREATIVE_DIMENSIONS_KEY] = null;
+
+    var handleClickTagMessage = function(e) {
+      try {
+        var eventData = JSON.parse(e.data);
+      } catch (err) {
+        return;
+      }
+      if (eventData.isInitClickTag) {
+        if (eventData.clickTags) {
+          for (var i = 0; i < eventData.clickTags.length; i++) {
+            var clkTag = eventData.clickTags[i];
+            window[clkTag.name] = clkTag.url;
+
+            if (clkTag.eTldPlusOne) {
+              eTldPlusOnes[clkTag.url] = clkTag.eTldPlusOne;
+            }
+            if (clkTag.reportingId) {
+              reportingIds[clkTag.url] = clkTag.reportingId;
+            }
+          }
+        } else if (eventData.clickTag) {
+          window.clickTag = eventData.clickTag;
+        }
+        relegateNavigation = eventData.relegateNavigation;
+      }
+      if (isNewtonEnabled(eventData) && !isNewtonTokenSet) {
+        var newtonOt2Token = eventData.newtonOt2Token;
+        enableAttributionReportingApi(newtonOt2Token);
+      }
+      if (eventData.isTurtleXAdClick) {
+        isTurtleXAdClick = true;
+      }
+    };
+
+    var isNewtonEnabled = function(eventData) {
+      return 'newtonOt2Token' in eventData;
+    }
+
+    var enableAttributionReportingApi = function(originTrialToken) {
+      if (/Chrome/.test(window.navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.httpEquiv = 'origin-trial';
+        meta.content = String(originTrialToken);
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        isNewtonTokenSet = true;
+      }
+    };
+
+    var storeClickCoordinates = function(e) {
+      urlParamMap[CLICK_X_URL_KEY] = Math.round(e.clientX);
+      urlParamMap[CLICK_Y_URL_KEY] = Math.round(e.clientY);
+    };
+
+    var getCreativeDimensions = function() {
+      return window.innerWidth + 'x' + window.innerHeight;
+    }
+
+    var getExitClickParams = function(e) {
+      urlParamMap[CREATIVE_DIMENSIONS_KEY] = getCreativeDimensions();
+
+      var exitParams = '';
+      for (var key in urlParamMap) {
+        exitParams += '&' + key + '=';
+        if (urlParamMap[key] !== null) {
+          exitParams += urlParamMap[key];
+        }
+      }
+      return exitParams;
+    }
+
+    var appendExitClickParams = function(url) {
+      var adUrlIndex = url.toLowerCase().indexOf(AD_URL_PARAM);
+      var paramsToBeAdded = getExitClickParams();
+      if (adUrlIndex > -1 && paramsToBeAdded.length <= MAX_URL_PARAM_LENGTH) {
+        url = url.substr(0, adUrlIndex) + paramsToBeAdded +
+          url.substr(adUrlIndex);
+      };
+      return url;
+    };
+
+    if (open.call) {
+      window.open = function(open) {
+        return function(url, name, features) {
+          if (isTurtleXAdClick && !!reportingIds[url]) {
+            var message = {
+              'reportingId': reportingIds[url],
+              'clickX': urlParamMap[CLICK_X_URL_KEY],
+              'clickY': urlParamMap[CLICK_Y_URL_KEY],
+              'creativeDims': getCreativeDimensions()
+              };
+            parent.postMessage(JSON.stringify(message), '*');
+          }
+          url = appendExitClickParams(url);
+          if (relegateNavigation === 'parent') {
+            var message = {'clickTag': url, 'isPostClickTag': true};
+            parent.postMessage(JSON.stringify(message), '*');
+          } else {
+            var args = [url, name];
+            var windowFeatures = '';
+
+            if (features) {
+              windowFeatures = windowFeatures.concat(features);
+            }
+            if (isNewtonTokenSet &&
+                !!document.featurePolicy?.allowedFeatures().includes(
+                  'attribution-reporting')) {
+              if (features) {
+                if (!features.includes('attributionsrc')) {
+                  windowFeatures = windowFeatures.concat(features, ', attributionsrc');
+                }
+              } else {
+                windowFeatures = windowFeatures.concat('attributionsrc');
+              }
+            }
+
+            if (windowFeatures) {
+              args.push(windowFeatures);
+            }
+            open.apply(window,args);
+          }
+        };
+      }(window.open);
+    }
+
+    if (window.addEventListener) {
+      window.addEventListener(
+          'message', handleClickTagMessage, false);
+      window.addEventListener('mousedown', storeClickCoordinates, true);
+    } else {
+      window.attachEvent('onmessage', handleClickTagMessage);
+    }
+  })();
+    
+  </script></head>
+
+<body onload="initBanner();">
+	<div id="t23_animation_container" style="background-color: transparent; width: 300px; height: 600px; left: 0px; opacity: 1;">
+		<canvas id="canvas" width="209" height="418" style="position: absolute; display: block; background-color: transparent; width: 300px; height: 600px; right: auto; left: auto;"></canvas>
+		<div id="t23_dom_overlay_container" style="pointer-events: none; overflow: hidden; width: 300px; height: 600px; position: absolute; left: 0px; top: 0px; display: block; right: auto;">
+
+	</div>
+	<div id="t23_video_container" class="video-container" style="right: auto; left: 0px; width: 300px; padding: 0px; opacity: 1;">
+			<video data-src="https://streaming.grm-pro.com/at.rewe/fileupload/billa/2025-01-trash-is-cash/500x1000_sb_billa_trash-cash.mp4" playsinline="" muted="muted" src="index_data/500x1000_sb_billa_trash-cash.mp4"></video>
+		
+		
+			<div class="video-controls opaque" style="opacity: 1;">
+<!-- 		
+			  <div class="btn group-play-pause" data-state="pause" data-fun="play_pause">
+				<div class="" data-icon="play">play</div>
+				<div class="" data-icon="pause">pause</div>
+				<div class="" data-icon="replay">replay</div>
+			  </div>
+		
+			  <div class="btn group-audio" data-state="off" data-fun="mute_toggle">
+				<div class="" data-icon="mute">mute</div>
+				<div class="" data-icon="unmute">unmute</div>
+			  </div>
+		
+			  <div class="group-progress" data-state="enabled" data-fun="progress">
+				<progress class="progress" data-icon="progress" value="20" min="0" max="100">
+				  <span class="progress-bar"></span>
+				</progress> -->
+			  </div>
+</div>
+
+
+</div></body></html>
