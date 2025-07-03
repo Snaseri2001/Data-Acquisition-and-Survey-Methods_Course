@@ -121,6 +121,23 @@ Study Performance (Enhanced)}
 }
 \section{Introduction}\label{introduction}
 
+\subsection{Research Questions}\label{research-questions}
+
+\begin{itemize}
+\tightlist
+\item
+  Q1: How does the type of music or silence influence students' focus
+  levels?
+\item
+  Q2: How do music type and focus level together affect task completion
+  time?
+\item
+  Q3: How does the type of background music impact the time required to
+  complete a task?
+\end{itemize}
+
+\subsection{Survay Questions}\label{survay-questions}
+
 In this report, we want to analyze whether the genre of background music
 has an impact on students' study performance. The hypothesis is that
 studying with low-tempo instrumental music helps complete comprehension
@@ -232,7 +249,9 @@ A bar plot shows the frequency of each music type.
 \includegraphics{Assignment2_files/figure-latex/unnamed-chunk-1-1.pdf}
 
 This plot shows the sample size for each music type, which is important
-for interpreting statistical test results later.
+for interpreting statistical test results later. It shows study without
+music leads to heigher time to complete the task. It also shows that
+type of music does not influence on the time of completion.
 
 \subsection{Completion Time by Background Music
 Type}\label{completion-time-by-background-music-type}
@@ -336,6 +355,26 @@ distributions.
 These histograms provide insights into the overall spread and skewness
 of the numerical variables, which is useful for assessing normality
 assumptions later.
+
+\subsection{Conclusion}\label{conclusion}
+
+Thease diagrams can answer the questions below:
+
+\begin{itemize}
+\item
+  RQ1: How does the type of music or silence influence students' focus
+  levels? As the statistices calculations show, listening to the music
+  has a positive influence on the focus level. But the type of the music
+  does not impact on it. it shows, studing in scilence will lead to
+  lower focus level. But in the future in the test we will see that
+  listening to the music while studing has a negative impact and it
+  caused by the outlier and noises in the data which has a negative
+  impact on this visualisation.
+\item
+  RQ3: How does the type of background music impact the time required to
+  complete a task? Type of Backgraound music does not have influce on
+  it. They are same.
+\end{itemize}
 
 \section{Descriptive Inference}\label{descriptive-inference}
 
@@ -711,14 +750,71 @@ statistics' close means, but the significant drop in rank for music
 groups versus ``None'' suggests that self-reported focus is lower in the
 presence of music when considering the entire distribution.
 
-Finally, the Hypothesis: Instrumental music improves focus and
-performance. is not correct. Based on the analysis, both the one-way
-ANOVA and the Kruskal-Wallis rank sum test consistently indicate that
-the type of background music significantly influences the time taken to
-complete tasks and focous level. Specifically, the findings suggest that
-students listening to either instrumental music or music with lyrics
-tend to complete tasks slower compared to those studying in silence.
-Listening to music also have a negative influence on their focous.
+\subsection{Effect of MusicType and FocusLevel on Time to
+Complete}\label{effect-of-musictype-and-focuslevel-on-time-to-complete}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{anova\_model }\OtherTok{\textless{}{-}} \FunctionTok{aov}\NormalTok{(TimeToComplete }\SpecialCharTok{\textasciitilde{}}\NormalTok{ MusicType }\SpecialCharTok{*}\NormalTok{ FocusLevel, }\AttributeTok{data =}\NormalTok{ data)}
+\FunctionTok{summary}\NormalTok{(anova\_model)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                      Df Sum Sq Mean Sq F value Pr(>F)  
+## MusicType             2  12969    6485   3.337 0.0401 *
+## FocusLevel            1     59      59   0.030 0.8623  
+## MusicType:FocusLevel  2  18804    9402   4.839 0.0102 *
+## Residuals            87 169043    1943                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 3 observations deleted due to missingness
+\end{verbatim}
+
+But Here we use Scheirer-Ray-Hare test, an extension of the
+Kruskal-Wallis test for two-way designs. This test analyzes the main
+effects and interaction using ranks, making it appropriate for
+non-normal data.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(rcompanion)}
+\NormalTok{rh\_result }\OtherTok{\textless{}{-}} \FunctionTok{scheirerRayHare}\NormalTok{(TimeToComplete }\SpecialCharTok{\textasciitilde{}}\NormalTok{ MusicType }\SpecialCharTok{*}\NormalTok{ FocusLevel, }\AttributeTok{data =}\NormalTok{ data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## DV:  TimeToComplete 
+## Observations:  93 
+## D:  0.9808123 
+## MS total:  728.5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{print}\NormalTok{(rh\_result)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                      Df Sum Sq      H p.value
+## MusicType             2   3718 5.2037 0.07414
+## FocusLevel            8   6599 9.2349 0.32287
+## MusicType:FocusLevel 11   5670 7.9357 0.71906
+## Residuals            71  45220
+\end{verbatim}
+
+RQ3: How does the type of background music impact the time required to
+complete a task?
+
+The Scheirer-Ray-Hare test showed no statistically significant effects
+overall. MusicType had a marginal effect on TimeToComplete (p = 0.074),
+suggesting a possible influence, though not significant at the 0.05
+level. FocusLevel (p = 0.323) and the interaction between MusicType and
+FocusLevel (p = 0.719) were not significant. This suggests that neither
+focus level nor its combination with music type had a clear impact on
+task completion time
 
 \section{Functions}\label{functions}
 
